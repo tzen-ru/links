@@ -83,6 +83,27 @@
       color: #596579;
       font-size: 14px;
     }
+    #project-search {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  padding: 14px 16px;
+  border: 1px solid #dce2ec;
+  border-radius: 12px;
+  background: white;
+  color: #202938;
+  font: inherit;
+}
+
+#project-search:focus-visible {
+  outline: 3px solid #3563d9;
+  outline-offset: 2px;
+}
+
+#search-status {
+  color: #596579;
+  font-size: 14px;
+}
   </style>
 </head>
   <body>
@@ -92,7 +113,14 @@
     Мои проекты на 1С-Битрикс и WordPress.
     Разрабатываю сайты, поддерживаю их работу и развиваю функциональность.
   </p>
-
+<label for="project-search">Найти проект</label>
+<input
+  id="project-search"
+  type="search"
+  placeholder="Название, домен или платформа"
+  autocomplete="off"
+>
+<p id="search-status" role="status"></p>
   <ul class="links">
     <li>
       <a class="card" href="https://expert-cable.ru/">
@@ -141,5 +169,43 @@
 
   <footer>Разработка и сопровождение сайтов · 1С-Битрикс · WordPress</footer>
 </main>
+    <script>
+  const search = document.querySelector("#project-search");
+  const status = document.querySelector("#search-status");
+
+  const normalize = (text) =>
+    text.toLocaleLowerCase("ru").replaceAll("ё", "е").trim();
+
+  const projects = [...document.querySelectorAll(".links > li")]
+    .map((item) => {
+      const link = item.querySelector("a");
+
+      return {
+        item,
+        text: normalize(
+          item.textContent + " " + link.getAttribute("href")
+        )
+      };
+    });
+
+  function filterProjects() {
+    const words = normalize(search.value).split(/\s+/).filter(Boolean);
+    let visibleCount = 0;
+
+    projects.forEach(({ item, text }) => {
+      const matches = words.every((word) => text.includes(word));
+      item.hidden = !matches;
+
+      if (matches) visibleCount++;
+    });
+
+    status.textContent = visibleCount
+      ? `Показано проектов: ${visibleCount} из ${projects.length}`
+      : "Ничего не найдено. Попробуйте другое название или платформу.";
+  }
+
+  search.addEventListener("input", filterProjects);
+  filterProjects();
+</script>
 </body>
 </html>
